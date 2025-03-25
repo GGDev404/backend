@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Room } from '../models/room.entity';
 import { Hotel } from '../models/hotel.entity';
+import { Reservation } from 'src/models/reservation.entity';
+import { CheckAvailabilityDto } from 'src/dtos/check-availability.dto';
 
 @Injectable()
 export class RoomService {
@@ -11,6 +13,8 @@ export class RoomService {
     private roomRepository: Repository<Room>,
     @InjectRepository(Hotel)
     private hotelRepository: Repository<Hotel>,
+    @InjectRepository(Reservation)
+    private reservationRepository: Repository<Reservation>
   ) {}
 
   async create(room: Room, hotelId: string): Promise<Room> {
@@ -24,5 +28,42 @@ export class RoomService {
 
   async findAll(): Promise<Room[]> {
     return this.roomRepository.find({ relations: ['hotel'] });
+  }
+  async checkAvailability(query: CheckAvailabilityDto): Promise<any[]> {
+    // 1. Obtener todas las habitaciones
+    const rooms = await this.roomRepository.find({
+      relations: ['hotel'],
+    });
+
+    // 2. Verificar disponibilidad para cada habitación
+    const availability = await Promise.all(
+      rooms.map(async (room) => {
+        // 3. Buscar reservas que se solapen con el rango de fechas
+        const conflictingReservation = await this.reservationRepository
+          .createQueryBuilder('reservation')
+          .where('reservation.roomId = :roomId', { roomId: room.id })
+          .andWhere(
+            `(
+              (reservation.checkInDate <= :end AND reservation.checkOutDate >= :start)
+            )`,
+            {
+              start: query.start,
+              end: query.end,
+            },
+          )
+          .getExists();
+
+        return {
+          id: room.id,
+          roomNumber: room.roomNumber,
+          type: room.type,
+          price: room.price,
+          hotelId: room.hotel.id,
+          isAvailable: !conflictingReservation,
+        };
+      }),
+    );
+
+    return availability;
   }
 }

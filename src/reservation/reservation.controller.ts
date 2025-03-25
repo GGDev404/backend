@@ -4,6 +4,7 @@ import { Reservation } from '../models/reservation.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as ExpressRequest, request } from 'express';
 import { User } from 'src/decorators/user.decorator';
+import { ReservedDaysResponseDTO } from 'src/dtos/reserved-days.dto';
 
 
 @Controller('reservations')
@@ -24,4 +25,13 @@ export class ReservationController {
   async findAll(): Promise<Reservation[]> {
     return this.reservationService.findAll();
   }
+
+
+  @Get('/room/:roomId/reserved-days')
+  async getReservedDays(
+    @Param('roomId') roomId: number,
+  ): Promise<ReservedDaysResponseDTO> {
+    return this.reservationService.getReservedDays(roomId);
+  }
+
 }

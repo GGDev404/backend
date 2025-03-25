@@ -1,6 +1,7 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UsePipes, ValidationPipe, Query } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { Room } from '../models/room.entity';
+import { CheckAvailabilityDto } from 'src/dtos/check-availability.dto';
 
 @Controller('rooms')
 export class RoomController {
@@ -15,4 +16,10 @@ export class RoomController {
   async findAll(): Promise<Room[]> {
     return this.roomService.findAll();
   }
+
+  @Get('availability')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async checkAvailability(@Query() query: CheckAvailabilityDto) {
+    return this.roomService.checkAvailability(query);
+}
 }
