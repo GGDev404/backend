@@ -27,6 +27,11 @@ export class RoomController {
     return this.roomService.findAll();
   }
 
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<Room> {
+    return this.roomService.findOne(id);
+  }
+
   @Get('availability')
   @UsePipes(new ValidationPipe({ transform: true }))
   async checkAvailability(@Query() query: CheckAvailabilityDto) {

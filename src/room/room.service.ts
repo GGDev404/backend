@@ -36,6 +36,14 @@ export class RoomService {
     return this.roomRepository.save(room);
   }
 
+  async findOne(id: string): Promise<Room> {
+    const room = await this.roomRepository.findOne({ where: { id: parseInt(id) }, relations: ['hotel'] });
+    if (!room) {
+      throw new Error(`Room with id ${id} not found`);
+    }
+    return room;
+  }
+
   async findAll(): Promise<Room[]> {
     return this.roomRepository.find({ relations: ['hotel'] });
   }

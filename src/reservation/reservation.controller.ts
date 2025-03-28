@@ -11,6 +11,16 @@ import { ReservedDaysResponseDTO } from 'src/dtos/reserved-days.dto';
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
+  @Get(':id')
+  @UseGuards(AuthGuard('jwt'))
+  async findOne(@Param('id') id: number): Promise<Reservation> {
+    const reservation = await this.reservationService.findOne(id);
+    if (!reservation) {
+      throw new Error(`Reservation with id ${id} not found`);
+    }
+    return reservation;
+  }
+
   @Post('/verify/:id')
   async verifyReservation(
     @Body() verificationCode: string,

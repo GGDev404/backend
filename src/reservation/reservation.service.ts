@@ -73,6 +73,14 @@ export class ReservationService {
     return this.reservationRepository.find({ relations: ['user', 'room'] });
   }
 
+  async findOne(id: number): Promise<Reservation> {
+    const reservation = await this.reservationRepository.findOne({ where: { id }, relations: ['user', 'room'] });
+    if (!reservation) {
+      throw new Error(`Reservation with id ${id} not found`);
+    }
+    return reservation;
+  }
+
   async getReservedDays(roomId: number): Promise<ReservedDaysResponseDTO> {
     // Obtener todas las reservas de la habitación
     const reservations = await this.reservationRepository.find({
