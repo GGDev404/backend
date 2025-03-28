@@ -50,19 +50,12 @@ export class ReservationService {
     let codigo = this.generarCodigoVerificacion();
     reservation.verificationCode = codigo;
     
-
-
-    // await this.emailService.sendReservationConfirmation(
-    //   user.email,
-    //   {
-    //     nombreUsuario: user.name,
-    //     verificationCode: codigo,
-    //     detalles: [{hotelName: hotel.name,
-    //       roomNumber: room.id,
-    //       checkIn: reservation.checkInDate,
-    //       checkOut: reservation.checkOutDate,}]
-    //   }
-    // );
+    // Enviar código de verificación al usuario
+    await this.emailService.sendCode(
+      user.email,
+      user.name,
+      codigo
+    );
 
 
 
