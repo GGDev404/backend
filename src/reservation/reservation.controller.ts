@@ -15,10 +15,11 @@ export class ReservationController {
   @UseGuards(AuthGuard('jwt'))
   async create(
     @Body() reservation: Reservation,
-    @User('sub') userId: string,
+    @User('email') email: string,
     @Param('roomId') roomId: number,
   ): Promise<Reservation> {
-    return this.reservationService.create(reservation, userId, roomId);
+     console.log('Este es el id del usuario '+ email)
+    return this.reservationService.create(reservation, email, roomId);
   }
 
   @Get()

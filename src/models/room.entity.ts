@@ -8,13 +8,20 @@ export class Room {
   id: number;
 
   @Column()
-  roomNumber: string;
+  name: string;
 
   @Column()
   type: string;
 
   @Column()
   price: number;
+
+  @Column()
+  amenities: string;
+
+  @Column()
+  image?: string;
+
 
   @ManyToOne(() => Hotel, hotel => hotel.rooms)
   hotel: Hotel;

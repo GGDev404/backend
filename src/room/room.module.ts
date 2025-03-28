@@ -5,10 +5,11 @@ import { RoomController } from './room.controller';
 import { Room } from '../models/room.entity';
 import { Hotel } from '../models/hotel.entity';
 import { Reservation } from 'src/models/reservation.entity';
+import { FileService } from 'src/file/file.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Room, Hotel, Reservation])],
   controllers: [RoomController],
-  providers: [RoomService],
+  providers: [RoomService, FileService],
 })
 export class RoomModule {}

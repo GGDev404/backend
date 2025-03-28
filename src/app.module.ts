@@ -6,6 +6,10 @@ import { RoomModule } from './room/room.module';
 import { HotelModule } from './hotel/hotel.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { FileModule } from './file/file.module';
+import { EmailModule } from './mails/email.module';
 
 
 
@@ -18,6 +22,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         envFilePath: '.env',
       }
     ),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -36,7 +44,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     HotelModule,
     ReservationModule,
     RoomModule,
-    AuthModule
+    AuthModule,
+    FileModule,
+    EmailModule,
   ],
 })
 export class AppModule {}

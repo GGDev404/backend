@@ -13,6 +13,15 @@ export class Reservation {
   @Column()
   checkOutDate: Date;
 
+  @Column()
+  totalPrice: number;
+
+  @Column()
+  guests: number;
+
+  @Column()
+  status: 'pending' | 'confirmed';
+
   @ManyToOne(() => User, user => user.reservations)
   user: User;
 

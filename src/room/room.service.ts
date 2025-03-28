@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Room } from '../models/room.entity';
 import { Hotel } from '../models/hotel.entity';
 import { Reservation } from 'src/models/reservation.entity';
 import { CheckAvailabilityDto } from 'src/dtos/check-availability.dto';
+import { FileService } from 'src/file/file.service';
 
 @Injectable()
 export class RoomService {
@@ -14,10 +15,19 @@ export class RoomService {
     @InjectRepository(Hotel)
     private hotelRepository: Repository<Hotel>,
     @InjectRepository(Reservation)
-    private reservationRepository: Repository<Reservation>
+    private reservationRepository: Repository<Reservation>,
+    @Inject(FileService)
+    private filesService: FileService,
   ) {}
 
-  async create(room: Room, hotelId: string): Promise<Room> {
+  async create(
+    room: Room, 
+    hotelId: string,
+    image: Express.Multer.File
+  ): Promise<Room> {
+    if (image) {
+      room.image = image.filename;
+    }
     const hotel = await this.hotelRepository.findOne({ where: { id: hotelId } });
     if (!hotel) {
       throw new Error(`Hotel with id ${hotelId} not found`);
@@ -55,7 +65,7 @@ export class RoomService {
 
         return {
           id: room.id,
-          roomNumber: room.roomNumber,
+          roomNumber: room.name,
           type: room.type,
           price: room.price,
           hotelId: room.hotel.id,

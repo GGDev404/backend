@@ -20,6 +20,12 @@ export class User {
   @Column()
   password: string;
 
+  @Column()
+  phone: string;
+
+  @Column()
+  imageUrl: string;
+
   @Column({
     type: 'enum',
     enum: UserRole,
