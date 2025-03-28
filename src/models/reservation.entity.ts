@@ -19,6 +19,9 @@ export class Reservation {
   @Column()
   guests: number;
 
+  @Column({ nullable: true })
+  verificationCode?: string;
+
   @Column()
   status: 'pending' | 'confirmed';
 

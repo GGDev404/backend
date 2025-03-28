@@ -11,6 +11,29 @@ import { ReservedDaysResponseDTO } from 'src/dtos/reserved-days.dto';
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
+  @Post('/verify/:id')
+  async verifyReservation(
+    @Body() verificationCode: string,
+    @Param('id') id: number,
+  ): Promise<Reservation> {
+    return this.reservationService.confirmReservation(verificationCode,id);
+  }
+
+  @Post('sendCode/:id')
+  async sendCode(
+    @Param('id') id: number,
+  ): Promise<void> {
+    await this.reservationService.sendCode(id);
+  }
+
+  @Post('SendConfirmationEmail/:id')
+  async sendVerificationCode(
+    @Param('id') id: number,
+  ): Promise<void> {
+    console.log('Este es el id de la reserva '+ id)
+    await this.reservationService.sentConfirmationEmail(id);
+  }
+
   @Post(':roomId')
   @UseGuards(AuthGuard('jwt'))
   async create(
@@ -34,5 +57,7 @@ export class ReservationController {
   ): Promise<ReservedDaysResponseDTO> {
     return this.reservationService.getReservedDays(roomId);
   }
+
+ 
 
 }

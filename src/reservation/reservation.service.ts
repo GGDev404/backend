@@ -46,20 +46,21 @@ export class ReservationService {
     
     reservation.user = user;
     reservation.room = room;
+
+    let codigo = this.generarCodigoVerificacion();
+    reservation.verificationCode = codigo;
     
-    console.log('Sending email...');
-    console.log("reservation"+JSON.stringify(reservation));
-    console.log('userId' + email);
-    console.log('user' + JSON.stringify(user));
-    console.log('hotel' + JSON.stringify(hotel));
+
 
     // await this.emailService.sendReservationConfirmation(
     //   user.email,
     //   {
-    //     hotelName: hotel.name,
-    //     roomNumber: room.id,
-    //     checkIn: reservation.checkInDate,
-    //     checkOut: reservation.checkOutDate,
+    //     nombreUsuario: user.name,
+    //     verificationCode: codigo,
+    //     detalles: [{hotelName: hotel.name,
+    //       roomNumber: room.id,
+    //       checkIn: reservation.checkInDate,
+    //       checkOut: reservation.checkOutDate,}]
     //   }
     // );
 
@@ -96,7 +97,90 @@ export class ReservationService {
     return { bookedDates };
   }
 
+  async confirmReservation(verificationCode: any, reservationId: number): Promise<Reservation> {
+    console.log('Este es el codigo de verificacion '+JSON.stringify(verificationCode));
+    console.log('Este es el id de la reserva '+reservationId);
+    const reservation = await this.reservationRepository
+    .createQueryBuilder('reservation')
+    .where('reservation.id = :id', { id : reservationId })
+    .getOne();
+    console.log('Esta es la reserva '+JSON.stringify(reservation));
+    if (!reservation) {
+      throw new Error('Reserva no encontrada');
+    }
+    if(!reservation.verificationCode == verificationCode.verificacionCode){
+      throw new Error('Código de verificación inválido');
+    }
+    reservation.status = 'confirmed';
+    return this.reservationRepository.save(reservation);
+  }
+
+  async sendCode(reservationId: number): Promise<void> {
+    const reservation = await this.reservationRepository.findOne({ where: { id: reservationId }, relations: ['user'] });
+    if (!reservation) {
+      throw new Error('Reserva no encontrada');
+    }
+    const user = await this.userRepository.findOne({ where: { id: reservation.user.id } });
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+    if(reservation.verificationCode){
+      await this.emailService.sendCode(
+        user.email,
+        user.name,
+        reservation.verificationCode
+      );
+      return;
+    }
+    throw new Error('Código de verificación no encontrado');
+  }
+
+  async sentConfirmationEmail(reservationId: number): Promise<void> {
+    console.log('Este es el id de la reserva '+ reservationId);
+    const reservation = await this.reservationRepository.findOne({ where: { id: reservationId }, relations: ['user', 'room'] });
+    console.log('Esta es la reserva '+JSON.stringify(reservation));
+    if (!reservation) {
+      throw new Error('Reserva no encontrada');
+    }
+    const user = await this.userRepository.findOne({ where: { id: reservation.user.id } });
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+    const room = await this.roomRepository.findOne({ where: { id: reservation.room.id } });
+    if (!room) {
+      throw new Error('Habitación no encontrada');
+    }
+
+      if(reservation.status == 'confirmed'){
+        await this.emailService.sendReservationConfirmation(
+          user.email,
+          {
+            nombreUsuario: user.name,
+            verificationCode: reservation.verificationCode,
+            detalles: [{
+              roomNumber: room.id,
+              checkIn: reservation.checkInDate,
+              checkOut: reservation.checkOutDate,}]
+          }
+        );
+        return;
+      }
+
+      throw new Error('Reserva no confirmada');
+
+    }
+
+
+
   
 
-
+generarCodigoVerificacion(): string {
+  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let codigo = '';
+  for (let i = 0; i < 8; i++) {
+      const indice = Math.floor(Math.random() * caracteres.length);
+      codigo += caracteres[indice];
+  }
+  return codigo;
+}
 }

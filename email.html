@@ -1,0 +1,89 @@
+
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+          @media only screen and (max-width: 600px) {
+            .container { width: 100% !important; }
+          }
+        </style>
+      </head>
+      <body style="margin: 0; padding: 20px 0; font-family: Arial, sans-serif; background-color: #f7f7f7;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td align="center">
+              <table class="container" width="600" border="0" cellspacing="0" cellpadding="30" style="background-color: #ffffff; border-radius: 10px;">
+                <!-- Header -->
+                <tr>
+                  <td align="center" style="padding: 20px 0; background-color: #2A4365; border-radius: 10px 10px 0 0;">
+                    <img src="https://ejemplo.com/logo-hotel.png" alt="${reservationDetails.hotelName}" width="200" style="display: block; margin: 0 auto;">
+                  </td>
+                </tr>
+  
+                <!-- Content -->
+                <tr>
+                  <td style="padding: 30px 20px;">
+                    <h1 style="color: #2A4365; margin: 0 0 25px 0;">¡Reserva Confirmada!</h1>
+                    
+                    <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                      <h2 style="color: #2A4365; margin-top: 0; font-size: 20px;">Detalles de tu reserva</h2>
+                      <table cellpadding="8" style="width: 100%;">
+                        <tr>
+                          <td width="30%" style="color: #718096;">Hotel:</td>
+                          <td style="color: #2d3748; font-weight: 500;">${reservationDetails.hotelName}</td>
+                        </tr>
+                        <tr>
+                          <td style="color: #718096;">Habitación:</td>
+                          <td style="color: #2d3748; font-weight: 500;">${reservationDetails.roomNumber}</td>
+                        </tr>
+                        <tr>
+                          <td style="color: #718096;">Check-in:</td>
+                          <td style="color: #2d3748; font-weight: 500;">${reservationDetails.checkIn}</td>
+                        </tr>
+                        <tr>
+                          <td style="color: #718096;">Check-out:</td>
+                          <td style="color: #2d3748; font-weight: 500;">${reservationDetails.checkOut}</td>
+                        </tr>
+                      </table>
+                    </div>
+  
+                    <div style="text-align: center; margin: 30px 0;">
+                      <a href="https://ejemplo.com/mi-cuenta" 
+                         style="background-color: #2A4365; color: white; padding: 12px 25px; 
+                                text-decoration: none; border-radius: 5px; display: inline-block;
+                                font-weight: bold; margin: 10px;">
+                        Ver Detalles en la App
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+  
+                <!-- Footer -->
+                <tr>
+                  <td style="background-color: #f8fafc; padding: 25px 20px; border-radius: 0 0 10px 10px; text-align: center;">
+                    <p style="color: #718096; margin: 5px 0; font-size: 14px;">
+                      ${reservationDetails.hotelName}<br>
+                      ${reservationDetails.hotelAddress}<br>
+                      Teléfono: ${reservationDetails.hotelPhone}
+                    </p>
+                    <div style="margin-top: 15px;">
+                      <a href="https://facebook.com/hotel" style="margin: 0 10px;">
+                        <img src="https://ejemplo.com/facebook-icon.png" alt="Facebook" width="24">
+                      </a>
+                      <a href="https://instagram.com/hotel" style="margin: 0 10px;">
+                        <img src="https://ejemplo.com/instagram-icon.png" alt="Instagram" width="24">
+                      </a>
+                    </div>
+                    <p style="color: #a0aec0; font-size: 12px; margin: 20px 0 0 0;">
+                      Este es un correo automático, por favor no responda a esta dirección
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
