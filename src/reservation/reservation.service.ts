@@ -20,44 +20,46 @@ export class ReservationService {
     @Inject(EmailService)
     private emailService: EmailService,
     @InjectRepository(Hotel)
-    private hotelRepository: Repository<Hotel>
-    
+    private hotelRepository: Repository<Hotel>,
   ) {}
 
-  async create(reservation: Reservation, email: string, roomId: number): Promise<Reservation> {
+  async create(
+    reservation: Reservation,
+    email: string,
+    roomId: number,
+  ): Promise<Reservation> {
     const user = await this.userRepository.findOne({ where: { email: email } });
-    const room = await this.roomRepository.findOne({ where: { id: roomId } , relations: ['hotel']});
-    
+    const room = await this.roomRepository.findOne({
+      where: { id: roomId },
+      relations: ['hotel'],
+    });
+
     if (!user) {
       throw new Error(`User with id ${email} not found`);
     }
-    
+
     if (!room) {
       throw new Error(`Room with id ${roomId} not found`);
     }
 
     console.log(JSON.stringify(room));
-    
-    const hotel = await this.hotelRepository.findOne({ where: { id: room.hotel.id } });
-    
+
+    const hotel = await this.hotelRepository.findOne({
+      where: { id: room.hotel.id },
+    });
+
     if (!hotel) {
       throw new Error(`Hotel with id ${room.hotel.id} not found`);
     }
-    
+
     reservation.user = user;
     reservation.room = room;
 
     let codigo = this.generarCodigoVerificacion();
     reservation.verificationCode = codigo;
-    
+
     // Enviar código de verificación al usuario
-    await this.emailService.sendCode(
-      user.email,
-      user.name,
-      codigo
-    );
-
-
+    await this.emailService.sendCode(user.email, user.name, codigo);
 
     return this.reservationRepository.save(reservation);
   }
@@ -67,7 +69,10 @@ export class ReservationService {
   }
 
   async findOne(id: number): Promise<Reservation> {
-    const reservation = await this.reservationRepository.findOne({ where: { id }, relations: ['user', 'room'] });
+    const reservation = await this.reservationRepository.findOne({
+      where: { id },
+      relations: ['user', 'room'],
+    });
     if (!reservation) {
       throw new Error(`Reservation with id ${id} not found`);
     }
@@ -83,11 +88,11 @@ export class ReservationService {
 
     // Generar lista de días reservados
     const bookedDates: string[] = [];
-    
+
     reservations.forEach((reservation) => {
       const start = new Date(reservation.checkInDate);
       const end = new Date(reservation.checkOutDate);
-      
+
       // Agregar todos los días entre checkIn y checkOut (incluyendo ambos)
       while (start <= end) {
         bookedDates.push(start.toISOString().split('T')[0]); // Formato YYYY-MM-DD
@@ -98,18 +103,23 @@ export class ReservationService {
     return { bookedDates };
   }
 
-  async confirmReservation(verificationCode: any, reservationId: number): Promise<Reservation> {
-    console.log('Este es el codigo de verificacion '+JSON.stringify(verificationCode));
-    console.log('Este es el id de la reserva '+reservationId);
+  async confirmReservation(
+    verificationCode: any,
+    reservationId: number,
+  ): Promise<Reservation> {
+    console.log(
+      'Este es el codigo de verificacion ' + JSON.stringify(verificationCode),
+    );
+    console.log('Este es el id de la reserva ' + reservationId);
     const reservation = await this.reservationRepository
-    .createQueryBuilder('reservation')
-    .where('reservation.id = :id', { id : reservationId })
-    .getOne();
-    console.log('Esta es la reserva '+JSON.stringify(reservation));
+      .createQueryBuilder('reservation')
+      .where('reservation.id = :id', { id: reservationId })
+      .getOne();
+    console.log('Esta es la reserva ' + JSON.stringify(reservation));
     if (!reservation) {
       throw new Error('Reserva no encontrada');
     }
-    if(!reservation.verificationCode == verificationCode.verificacionCode){
+    if (!reservation.verificationCode == verificationCode.verificacionCode) {
       throw new Error('Código de verificación inválido');
     }
     reservation.status = 'confirmed';
@@ -117,19 +127,24 @@ export class ReservationService {
   }
 
   async sendCode(reservationId: number): Promise<void> {
-    const reservation = await this.reservationRepository.findOne({ where: { id: reservationId }, relations: ['user'] });
+    const reservation = await this.reservationRepository.findOne({
+      where: { id: reservationId },
+      relations: ['user'],
+    });
     if (!reservation) {
       throw new Error('Reserva no encontrada');
     }
-    const user = await this.userRepository.findOne({ where: { id: reservation.user.id } });
+    const user = await this.userRepository.findOne({
+      where: { id: reservation.user.id },
+    });
     if (!user) {
       throw new Error('Usuario no encontrado');
     }
-    if(reservation.verificationCode){
+    if (reservation.verificationCode) {
       await this.emailService.sendCode(
         user.email,
         user.name,
-        reservation.verificationCode
+        reservation.verificationCode,
       );
       return;
     }
@@ -137,51 +152,75 @@ export class ReservationService {
   }
 
   async sentConfirmationEmail(reservationId: number): Promise<void> {
-    console.log('Este es el id de la reserva '+ reservationId);
-    const reservation = await this.reservationRepository.findOne({ where: { id: reservationId }, relations: ['user', 'room'] });
-    console.log('Esta es la reserva '+JSON.stringify(reservation));
+    console.log('Este es el id de la reserva ' + reservationId);
+    const reservation = await this.reservationRepository.findOne({
+      where: { id: reservationId },
+      relations: ['user', 'room'],
+    });
+    console.log('Esta es la reserva ' + JSON.stringify(reservation));
     if (!reservation) {
       throw new Error('Reserva no encontrada');
     }
-    const user = await this.userRepository.findOne({ where: { id: reservation.user.id } });
+    const user = await this.userRepository.findOne({
+      where: { id: reservation.user.id },
+    });
     if (!user) {
       throw new Error('Usuario no encontrado');
     }
-    const room = await this.roomRepository.findOne({ where: { id: reservation.room.id } });
+    const room = await this.roomRepository.findOne({
+      where: { id: reservation.room.id },
+    });
     if (!room) {
       throw new Error('Habitación no encontrada');
     }
 
-      if(reservation.status == 'confirmed'){
-        await this.emailService.sendReservationConfirmation(
-          user.email,
-          {
-            nombreUsuario: user.name,
-            verificationCode: reservation.verificationCode,
-            detalles: [{
-              roomNumber: room.id,
-              checkIn: reservation.checkInDate,
-              checkOut: reservation.checkOutDate,}]
-          }
-        );
-        return;
-      }
+    if (reservation.status == 'confirmed') {
+      await this.emailService.sendReservationConfirmation(user.email, {
+        nombreUsuario: user.name,
+        telefono: user.phone,
+        verificationCode: reservation.verificationCode,
+        date: new Date().toISOString().split('T')[0], // Only date part in YYYY-MM-DD format
+        price : reservation.totalPrice,
+        guests: reservation.guests,
+        roomNumber: room.id,
+        checkIn: reservation.checkInDate,
+        checkOut: reservation.checkOutDate,
 
-      throw new Error('Reserva no confirmada');
-
+      });
+      return;
     }
 
+    throw new Error('Reserva no confirmada');
+  }
 
+  async getReservationsByUserEmail(
+    email: string,
+  ): Promise<Reservation[]> {
+    const user = await this.userRepository.findOne({
+      where: { email: email },
+      relations: ['reservations'],
+    });
+    if (!user) {
+      throw new Error(`User with email ${email} not found`);
+    }
+    const reservations = await this.reservationRepository.find({
+      where: { user: { id: user.id } },
+      relations: ['room'],
+    });
+    if (!reservations) {
+      throw new Error(`No reservations found for user with email ${email}`);
+    }
+    return reservations;
+  }
 
-  
-
-generarCodigoVerificacion(): string {
-  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let codigo = '';
-  for (let i = 0; i < 8; i++) {
+  generarCodigoVerificacion(): string {
+    const caracteres =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let codigo = '';
+    for (let i = 0; i < 8; i++) {
       const indice = Math.floor(Math.random() * caracteres.length);
       codigo += caracteres[indice];
+    }
+    return codigo;
   }
-  return codigo;
-}
 }

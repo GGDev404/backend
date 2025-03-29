@@ -84,4 +84,7 @@ export class RoomService {
 
     return availability;
   }
+
+
+
 }

@@ -11,6 +11,15 @@ import { ReservedDaysResponseDTO } from 'src/dtos/reserved-days.dto';
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
+  @Get('user/')
+  @UseGuards(AuthGuard('jwt'))
+  
+  async findByUser(@User('email') 
+   email: string): Promise<Reservation[]> {
+    return this.reservationService.getReservationsByUserEmail(email);
+  }
+ 
+
   @Get(':id')
   @UseGuards(AuthGuard('jwt'))
   async findOne(@Param('id') id: number): Promise<Reservation> {
@@ -68,6 +77,7 @@ export class ReservationController {
     return this.reservationService.getReservedDays(roomId);
   }
 
- 
+
+
 
 }

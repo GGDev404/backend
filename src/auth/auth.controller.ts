@@ -10,4 +10,6 @@ export class AuthController {
   async login(@Body() user: User) {
     return this.authService.login(user);
   }
+
+  
 }

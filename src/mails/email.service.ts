@@ -39,9 +39,15 @@ export class EmailService {
       from: this.configService.get<string>('EMAIL_FROM') || 'admin@paradise.com', // Provide a default or use getOrThrow
       templateId: 'd-f03f0ceaeae249c586c5a4b424c19709', // Aquí pones tu Template ID
       dynamic_template_data: {
+        date: reservationDetails.date,
         nombreUsuario: reservationDetails.nombreUsuario,
         verificationcode: reservationDetails.verificationCode,
-        detalles: reservationDetails.detalles, // Aquí mandas un array
+        telefono: reservationDetails.telefono,
+        roomNumber: reservationDetails.roomNumber,
+        checkIn: reservationDetails.checkIn,
+        checkOut: reservationDetails.checkOut,
+        price : reservationDetails.price,
+        guests: reservationDetails.guests,
       },
       subject: 'Confirmación de reserva',
     };
